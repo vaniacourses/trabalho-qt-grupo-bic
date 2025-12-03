@@ -22,7 +22,7 @@ Classes Testes implementadas para o trabalho:
 - Daniel Fontoura: [VerificadorTransacaoTest.java](banco/test/interfaceUsuario/verificadores/dados/VerificadorTransacaoTest.java)
 - Daniele Pimenta: [ContaTest.java](banco/test/src/conta/ContaTest.java)
 - Irhael Chagas: [VerificadorClientesTest.java](banco/test/interfaceUsuario/verificadores/dados/VerificadorClientesTest.java)
-- João Gabriel Otogali: [VerificadorPixTest.java](banco/test/interfaceUsuario/verificadores/dados/VerificadorPixTest.java)
+- João Gabriel Otogali: [VerificadorPixTest.java](banco/test/interfaceUsuario/verificadores/dados/VerificadorPixTest.java) e [VerificadorDataTest](banco/test/interfaceUsuario/verificadores/dados/VerificadorDataTest.java)
 
 # Ferramentas utilizadas para o trabalho
 - [IDE InteliJJ](https://www.jetbrains.com/idea/)
