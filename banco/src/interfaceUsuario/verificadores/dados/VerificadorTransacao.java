@@ -14,39 +14,53 @@ import static interfaceUsuario.verificadores.dados.VerificadorEntrada.*;
 
 public class VerificadorTransacao {
 
+    // CONSTRUTOR REMOVIDO PARA AUMENTAR A COBERTURA NOS TESTES
+
     public static boolean dadosTransacao(String entrada, String tipoOperacao, String tipoConta) throws ValorInvalido {
-        int value;
-        try {
-            value = Integer.parseInt(entrada);
-        } catch (Exception exception) {
-            System.out.println("Por favor, coloque um valor valido.");
-            value = Integer.parseInt(entrada);
-        }
-        if (tipoOperacao.equals(TRANSFERENCIA)) {
+        int value = tentarConverterValor(entrada);
+
+        if (TRANSFERENCIA.equals(tipoOperacao)) {
             return verificarEntradaValor(entrada, tipoOperacao);
-        } else if (tipoOperacao.equals(DEPOSITO)) {
-            if (value > 0.0) {
-                double valorDepositosOcorridos = InterfaceUsuario.getClienteAtual().getConta().getSaldoTotalDepositado();
-                switch (tipoConta) {
-                    case STANDARD:
-                        if (value <= ContaStandard.DEPOSITO_MAXIMO && valorDepositosOcorridos + value <= ContaStandard.DEPOSITO_MAXIMO) {
-                            return true;
-                        }
-                        throw new ValorInvalido("[ERRO] O seu tipo de conta nao permite transacoes maiores do que " + ContaStandard.DEPOSITO_MAXIMO + " reais\nPor favor, insira um valor valido!");
-                    case PREMIUM:
-                        if (value <= ContaPremium.DEPOSITO_MAXIMO && valorDepositosOcorridos + value <= ContaPremium.DEPOSITO_MAXIMO) {
-                            return true;
-                        }
-                        throw new ValorInvalido("[ERRO] O seu tipo de conta nao permite transacoes maiores do que " + ContaPremium.DEPOSITO_MAXIMO + " reais\nPor favor, insira um valor valido!");
-                    case DIAMOND:
-                        if (value <= ContaDiamond.DEPOSITO_MAXIMO && valorDepositosOcorridos + value <= ContaDiamond.DEPOSITO_MAXIMO) {
-                            return true;
-                        }
-                        throw new ValorInvalido("[ERRO] Nossa agencia nao permite depositos maiores do que " + ContaDiamond.DEPOSITO_MAXIMO + " reais\nPor favor, insira um valor valido!");
-                }
-            }
+        } else if (DEPOSITO.equals(tipoOperacao) && value > 0) {
+            return validarRegrasDeposito(value, tipoConta);
         }
         return false;
+    }
+
+    private static boolean validarRegrasDeposito(int value, String tipoConta) throws ValorInvalido {
+        double saldoTotal = InterfaceUsuario.getClienteAtual().getConta().getSaldoTotalDepositado();
+        double novoTotal = saldoTotal + value;
+
+        switch (tipoConta) {
+            case STANDARD:
+                if (value <= ContaStandard.DEPOSITO_MAXIMO && novoTotal <= ContaStandard.DEPOSITO_MAXIMO) {
+                    return true;
+                }
+                throw new ValorInvalido("[ERRO] Limite excedido para Conta Standard (Max: " + ContaStandard.DEPOSITO_MAXIMO + ")");
+
+            case PREMIUM:
+                if (value <= ContaPremium.DEPOSITO_MAXIMO && novoTotal <= ContaPremium.DEPOSITO_MAXIMO) {
+                    return true;
+                }
+                throw new ValorInvalido("[ERRO] Limite excedido para Conta Premium (Max: " + ContaPremium.DEPOSITO_MAXIMO + ")");
+
+            case DIAMOND:
+                if (value <= ContaDiamond.DEPOSITO_MAXIMO && novoTotal <= ContaDiamond.DEPOSITO_MAXIMO) {
+                    return true;
+                }
+                throw new ValorInvalido("[ERRO] Limite excedido para Conta Diamond (Max: " + ContaDiamond.DEPOSITO_MAXIMO + ")");
+
+            default:
+                return false;
+        }
+    }
+
+    private static int tentarConverterValor(String entrada) {
+        try {
+            return Integer.parseInt(entrada);
+        } catch (NumberFormatException exception) {
+            return -1;
+        }
     }
 
     public static boolean valorFatura(String s, MenuUsuarioConstantes tipoOperacao, GerenciamentoCartao carteira) throws ValorInvalido {
@@ -57,8 +71,7 @@ public class VerificadorTransacao {
                     throw new ValorInvalido("[ERRO] Valor de pagamento maior que o valor da fatura");
                 }
             }
-        }
-        if (tipoOperacao == MenuUsuarioConstantes.AUMENTAR_FATURA) {
+        } else if (tipoOperacao == MenuUsuarioConstantes.AUMENTAR_FATURA) {
             if (verificarEntradaValorParaFatura(s, MenuUsuarioConstantes.NAO_VERIFICAR_VALOR_SALDO)) {
                 double valor = Double.parseDouble(s);
                 if (valor > carteira.getLimiteRestante()) {
@@ -67,7 +80,6 @@ public class VerificadorTransacao {
             }
             return false;
         }
-
         return true;
     }
 
@@ -79,12 +91,19 @@ public class VerificadorTransacao {
     }
 
     public static boolean verificarBoleto(String[] entrada) throws ValorInvalido {
-        if (verificarEntradaValorPositivo(entrada[0]) || verificarEntradaValorPositivo(entrada[2])) {
+        try {
+            if (verificarEntradaValorPositivo(entrada[0]) || verificarEntradaValorPositivo(entrada[2])) {
+                return false;
+            }
+        } catch (IllegalArgumentException e) {
+            // Captura TipoInvalido ou NumberFormatException e trata como validação falha
             return false;
         }
+
         if (!VerificadorData.verificarData(entrada[1])) {
             return false;
         }
+
         try {
             Integer.parseInt(entrada[2]);
         } catch (NumberFormatException ex) {
@@ -92,5 +111,4 @@ public class VerificadorTransacao {
         }
         return true;
     }
-
 }
