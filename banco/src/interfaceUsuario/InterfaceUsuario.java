@@ -64,5 +64,12 @@ public class InterfaceUsuario {
 		InterfaceUsuario.dadosCartao = dadosCartao;
 	}
 
-
+	// pra permitir testes funcionais reais com o system lambda
+	public static double lerValor(String mensagem) {
+	    System.out.println(mensagem);
+	    java.util.Scanner sc = new java.util.Scanner(System.in);
+	    return sc.nextDouble();
+	}
+	
 }
+
